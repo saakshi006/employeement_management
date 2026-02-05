@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>Employers</h2>
+    </div>
+    <div class="col-md-4">
+        <input type="text" id="searchEmployer" class="form-control" placeholder="Search companies...">
+    </div>
+</div>
+
+<div class="row" id="employerList">
+    {% for employer in employers %}
+        <div class="col-md-6 mb-4 employer-card" 
+             data-name="{{ employer.company_name|lower }}" 
+             data-location="{{ employer.location|lower }}">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ employer.company_name }}</h5>
+                    <p class="card-text">
+                        <i class="fas fa-map-marker-alt text-danger"></i> {{ employer.location }}<br>
+                        <i class="fas fa-envelope text-primary"></i> {{ employer.contact_email }}<br>
+                        <i class="fas fa-phone text-success"></i> {{ employer.phone }}
+                    </p>
+                    <a href="{% url 'job_list' %}?employer={{ employer.id }}" class="btn btn-outline-primary btn-sm">View Jobs</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">No employers found.</div>
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+    document.getElementById('searchEmployer').addEventListener('keyup', function() {
+        const query = this.value.toLowerCase();
+        const cards = document.querySelectorAll('.employer-card');
+        
+        cards.forEach(card => {
+            const name = card.dataset.name;
+            const location = card.dataset.location;
+            
+            if (name.includes(query) || location.includes(query)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

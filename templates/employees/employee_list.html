@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>Job Seekers</h2>
+    </div>
+    <div class="col-md-4">
+        <!-- Search Form -->
+        <input type="text" id="searchInput" class="form-control" placeholder="Live search by name, skill, or location...">
+    </div>
+</div>
+
+<div class="row" id="employeeList">
+    {% for employee in employees %}
+        <div class="col-md-6 mb-4 employee-card" 
+             data-name="{{ employee.name|lower }}" 
+             data-skills="{% for skill in employee.skills.all %}{{ skill.name|lower }} {% endfor %}"
+             data-location="{{ employee.location|lower }}">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="card-title">{{ employee.name }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ employee.age }} years old • {{ employee.experience_years }} years exp</h6>
+                        </div>
+                        <span class="badge bg-secondary">{{ employee.location }}</span>
+                    </div>
+                    
+                    <p class="card-text mt-2">
+                        <strong>Skills:</strong><br>
+                        {% for skill in employee.skills.all %}
+                            <span class="badge bg-info text-dark">{{ skill.name }}</span>
+                        {% empty %}
+                            <span class="text-muted">No skills listed</span>
+                        {% endfor %}
+                    </p>
+                    
+                    <div class="mt-3">
+                        <a href="tel:{{ employee.phone }}" class="btn btn-outline-primary btn-sm"><i class="fas fa-phone"></i> Contact</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">No employees found.</div>
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const query = this.value.toLowerCase();
+        const cards = document.querySelectorAll('.employee-card');
+        
+        cards.forEach(card => {
+            const name = card.dataset.name;
+            const skills = card.dataset.skills;
+            const location = card.dataset.location;
+            
+            if (name.includes(query) || skills.includes(query) || location.includes(query)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

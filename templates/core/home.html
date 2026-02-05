@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="jumbotron text-center bg-light p-5 rounded">
+    <h1 class="display-4">Skill-Based Employment System</h1>
+    <p class="lead">Connecting job seekers and employers based on skills, not just degrees.</p>
+    <hr class="my-4">
+    <p>Find the right job or the right candidate efficiently.</p>
+    {% if not user.is_authenticated %}
+        <p class="lead">
+            <a class="btn btn-primary btn-lg" href="{% url 'register' %}" role="button">Get Started</a>
+            <a class="btn btn-outline-secondary btn-lg" href="{% url 'login' %}" role="button">Login</a>
+        </p>
+    {% else %}
+        <p class="lead">
+            <a class="btn btn-primary btn-lg" href="{% url 'dashboard' %}" role="button">Go to Dashboard</a>
+        </p>
+    {% endif %}
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4 text-center">
+        <i class="fas fa-users fa-3x text-primary mb-3"></i>
+        <h3>For Employees</h3>
+        <p>Create a profile, list your skills, and get matched with jobs that fit your abilities.</p>
+    </div>
+    <div class="col-md-4 text-center">
+        <i class="fas fa-briefcase fa-3x text-success mb-3"></i>
+        <h3>For Employers</h3>
+        <p>Post jobs and find candidates ranked by how well their skills match your requirements.</p>
+    </div>
+    <div class="col-md-4 text-center">
+        <i class="fas fa-handshake fa-3x text-warning mb-3"></i>
+        <h3>Fair Matching</h3>
+        <p>Our algorithm matches based on 70% skill compatibility and 30% experience.</p>
+    </div>
+</div>
+{% endblock %}

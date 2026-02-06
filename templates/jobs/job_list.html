@@ -65,8 +65,7 @@
         </p>
 
         <div class="mt-3">
-          {% if user.role == 'employer' and user.employer_profile ==
-          job.employer %}
+          {% if user.role == 'employer' and user.employer_profile == job.employer %}
           <a href="{% url 'update_job' job.pk %}" class="btn btn-sm btn-warning"
             >Edit</a
           >

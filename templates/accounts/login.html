@@ -1,53 +1,75 @@
-{% extends 'base.html' %}
-
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white text-center">
-                <h3>Login</h3>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    <!-- Render form fields manually for better bootstrap styling or use widget tweaks -->
-                    {% for field in form %}
-                        <div class="mb-3">
-                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                            <input type="{{ field.field.widget.input_type }}" 
-                                   name="{{ field.name }}" 
-                                   id="{{ field.id_for_label }}" 
-                                   class="form-control {% if field.errors %}is-invalid{% endif %}"
-                                   {% if field.value %}value="{{ field.value }}"{% endif %}
-                                   {% if field.field.required %}required{% endif %}>
-                            {% if field.errors %}
-                                <div class="invalid-feedback">
-                                    {{ field.errors.0 }}
-                                </div>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Login</button>
-                    </div>
-                </form>
-            </div>
-            <div class="card-footer text-center">
-                <small>Don't have an account? <a href="{% url 'register' %}">Register here</a></small>
-            </div>
-        </div>
-        
-        <!-- Demo Accounts Info -->
-        <div class="mt-4 card">
-            <div class="card-body">
-                <h5 class="card-title text-center">Demo Accounts</h5>
-                <ul class="list-group list-group-flush small">
-                    <li class="list-group-item"><strong>Admin:</strong> admin@system.com / admin123</li>
-                    <li class="list-group-item"><strong>Employer:</strong> employer@demo.com / employer123</li>
-                    <li class="list-group-item"><strong>Employee:</strong> employee@employee.com / employee123</li>
-                </ul>
-            </div>
-        </div>
+  <div class="col-md-6 col-lg-4">
+    <div class="card shadow">
+      <div class="card-header bg-primary text-white text-center">
+        <h3>Login</h3>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <!-- Render form fields manually for better bootstrap styling or use widget tweaks -->
+          {% for field in form %}
+          <div class="mb-3">
+            <label for="{{ field.id_for_label }}" class="form-label"
+              >{{ field.label }}</label
+            >
+            <input
+              type="{{ field.field.widget.input_type }}"
+              name="{{ field.name }}"
+              id="{{ field.id_for_label }}"
+              class="form-control {% if field.errors %}is-invalid{% endif %}"
+              {%
+              if
+              field.value
+              %}value="{{ field.value }}"
+              {%
+              endif
+              %}
+              {%
+              if
+              field.field.required
+              %}required{%
+              endif
+              %}
+            />
+            {% if field.errors %}
+            <div class="invalid-feedback">{{ field.errors.0 }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Login</button>
+          </div>
+        </form>
+      </div>
+      <div class="card-footer text-center">
+        <small
+          >Don't have an account?
+          <a href="{% url 'register' %}">Register here</a></small
+        >
+      </div>
     </div>
+
+    <!-- Demo Accounts Info -->
+    <div class="mt-4 card">
+      <div class="card-body">
+        <h5 class="card-title text-center">
+          Demo Accounts (Email or Username)
+        </h5>
+        <ul class="list-group list-group-flush small">
+          <li class="list-group-item">
+            <strong>Admin:</strong> admin@system.com / admin123
+          </li>
+          <li class="list-group-item">
+            <strong>Employer:</strong> employer@demo.com / employer123
+          </li>
+          <li class="list-group-item">
+            <strong>Employee:</strong> employee@employee.com / employee123
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

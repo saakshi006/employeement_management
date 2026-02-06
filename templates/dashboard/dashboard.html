@@ -3,56 +3,70 @@
 {% block content %}
 <h2 class="mb-4">Dashboard <small class="text-muted">Welcome, {{ user.username }}!</small></h2>
 
-<!-- Stats Row -->
+<!-- Charts Summary -->
 <div class="row mb-4">
-    <div class="col-md-4 mb-3">
-        <div class="card text-white bg-primary h-100">
-            <div class="card-body">
-                <h5 class="card-title">Employees</h5>
-                <p class="card-text display-4">{{ total_employees }}</p>
+    <!-- 1. System Overview -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header font-weight-bold">System Overview</div>
+            <div class="card-body text-center">
+                {% if chart_overview %}
+                    <img src="data:image/png;base64,{{ chart_overview }}" class="img-fluid" alt="System Overview">
+                {% else %}
+                    <p>No data available.</p>
+                {% endif %}
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-3">
-        <div class="card text-white bg-success h-100">
-            <div class="card-body">
-                <h5 class="card-title">Employers</h5>
-                <p class="card-text display-4">{{ total_employers }}</p>
+
+    <!-- 2. Top Skills -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header font-weight-bold">Top Skills in Demand</div>
+            <div class="card-body text-center">
+                {% if chart_skills %}
+                    <img src="data:image/png;base64,{{ chart_skills }}" class="img-fluid" alt="Top Skills">
+                {% else %}
+                    <p>No data available.</p>
+                {% endif %}
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-3">
-        <div class="card text-white bg-warning h-100">
-            <div class="card-body">
-                <h5 class="card-title">Active Jobs</h5>
-                <p class="card-text display-4">{{ total_jobs }}</p>
+</div>
+
+<div class="row mb-4">
+    <!-- 3. Match Quality -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header font-weight-bold">Match Quality Distribution</div>
+            <div class="card-body text-center">
+                {% if chart_match_quality %}
+                    <img src="data:image/png;base64,{{ chart_match_quality }}" class="img-fluid" alt="Match Quality">
+                {% else %}
+                    <p>No data available (No jobs taken yet).</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Jobs Taken -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header font-weight-bold">Jobs Taken by Employees</div>
+            <div class="card-body text-center">
+                {% if chart_jobs_taken %}
+                    <img src="data:image/png;base64,{{ chart_jobs_taken }}" class="img-fluid" alt="Jobs Taken">
+                {% else %}
+                    <p>No data available.</p>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
 <div class="row">
-    <!-- Top Skills -->
-    <div class="col-md-6 mb-4">
-        <div class="card h-100">
-            <div class="card-header">
-                Top Skills in Demand
-            </div>
-            <ul class="list-group list-group-flush">
-                {% for skill in top_skills %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ skill.name }}
-                        <span class="badge bg-primary rounded-pill">{{ skill.job_count }} Jobs</span>
-                    </li>
-                {% empty %}
-                    <li class="list-group-item text-muted">No data available.</li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-
     <!-- Role Specific Actions / Activity -->
-    <div class="col-md-6 mb-4">
+    <div class="col-md-12 mb-4">
         <div class="card h-100">
             <div class="card-header">
                 {% if user.role == 'employer' %}

@@ -1,6 +1,13 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import CustomUser
+
+class UserLoginForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super(UserLoginForm, self).__init__(*args, **kwargs)
+        self.fields['username'].label = 'Email or Username'
+        self.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Email or Username'})
+        self.fields['password'].widget.attrs.update({'class': 'form-control'})
 
 class SignUpForm(UserCreationForm):
     class Meta:

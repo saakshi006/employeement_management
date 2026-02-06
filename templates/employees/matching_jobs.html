@@ -59,7 +59,10 @@
                         <div>
                             <strong>Salary:</strong> {{ job.salary }}
                         </div>
-                        <a href="#" class="btn btn-primary btn-sm">Apply Now</a>
+                        <form action="{% url 'apply_job' job.pk %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-sm">Apply Now</button>
+                        </form>
                     </div>
                 </div>
             </div>

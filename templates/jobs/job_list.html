@@ -1,69 +1,96 @@
-{% extends 'base.html' %}
-
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <div class="row mb-4">
-    <div class="col-md-12">
-        <div class="card bg-light">
-            <div class="card-body">
-                <form method="get" class="row g-3">
-                    <div class="col-md-5">
-                        <input type="text" name="skill" class="form-control" placeholder="Filter by skill..." value="{{ request.GET.skill }}">
-                    </div>
-                    <div class="col-md-5">
-                        <input type="text" name="location" class="form-control" placeholder="Filter by location..." value="{{ request.GET.location }}">
-                    </div>
-                    <div class="col-md-2 d-grid">
-                        <button type="submit" class="btn btn-primary">Filter</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+  <div class="col-md-12">
+    <div class="card bg-light">
+      <div class="card-body">
+        <form method="get" class="row g-3">
+          <div class="col-md-5">
+            <input
+              type="text"
+              name="skill"
+              class="form-control"
+              placeholder="Filter by skill..."
+              value="{{ request.GET.skill }}"
+            />
+          </div>
+          <div class="col-md-5">
+            <input
+              type="text"
+              name="location"
+              class="form-control"
+              placeholder="Filter by location..."
+              value="{{ request.GET.location }}"
+            />
+          </div>
+          <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-primary">Filter</button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Available Jobs</h2>
-    {% if user.role == 'employer' %}
-        <a href="{% url 'create_job' %}" class="btn btn-success"><i class="fas fa-plus"></i> Post Job</a>
-    {% endif %}
+  <h2>Available Jobs</h2>
+  {% if user.role == 'employer' %}
+  <a href="{% url 'create_job' %}" class="btn btn-success"
+    ><i class="fas fa-plus"></i> Post Job</a
+  >
+  {% endif %}
 </div>
 
 <div class="row">
-    {% for job in jobs %}
-        <div class="col-md-6 mb-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <h5 class="card-title">{{ job.title }}</h5>
-                        <span class="badge bg-light text-dark border">{{ job.created_at|date:"M d" }}</span>
-                    </div>
-                    <h6 class="card-subtitle mb-2 text-muted">{{ job.employer.company_name }} • {{ job.location }}</h6>
-                    
-                    <p class="card-text mt-3">
-                        <strong>Salary:</strong> {{ job.salary }}<br>
-                        <strong>Experience:</strong> {{ job.experience_required }} years<br>
-                        <strong>Skills:</strong> 
-                        {% for skill in job.required_skills.all %}
-                            <span class="badge bg-secondary">{{ skill.name }}</span>
-                        {% endfor %}
-                    </p>
-                    
-                    <div class="mt-3">
-                        {% if user.role == 'employer' and user.employer_profile == job.employer %}
-                            <a href="{% url 'update_job' job.pk %}" class="btn btn-sm btn-warning">Edit</a>
-                            <a href="{% url 'delete_job' job.pk %}" class="btn btn-sm btn-danger">Delete</a>
-                        {% elif user.role == 'employee' %}
-                            <!-- Simple Apply Button (Mock) -->
-                            <button class="btn btn-sm btn-primary" onclick="alert('Application sent successfully!')">Apply</button>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
+  {% for job in jobs %}
+  <div class="col-md-6 mb-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <h5 class="card-title">{{ job.title }}</h5>
+          <span class="badge bg-light text-dark border"
+            >{{ job.created_at|date:"M d" }}</span
+          >
         </div>
-    {% empty %}
-        <div class="col-12">
-            <div class="alert alert-info">No jobs found matching your criteria.</div>
+        <h6 class="card-subtitle mb-2 text-muted">
+          {{ job.employer.company_name }} • {{ job.location }}
+        </h6>
+
+        <p class="card-text mt-3">
+          <strong>Salary:</strong> {{ job.salary }}<br />
+          <strong>Experience:</strong> {{ job.experience_required }} years<br />
+          <strong>Skills:</strong>
+          {% for skill in job.required_skills.all %}
+          <span class="badge bg-secondary">{{ skill.name }}</span>
+          {% endfor %}
+        </p>
+
+        <div class="mt-3">
+          {% if user.role == 'employer' and user.employer_profile ==
+          job.employer %}
+          <a href="{% url 'update_job' job.pk %}" class="btn btn-sm btn-warning"
+            >Edit</a
+          >
+          <a href="{% url 'delete_job' job.pk %}" class="btn btn-sm btn-danger"
+            >Delete</a
+          >
+          {% elif user.role == 'employee' %}
+          <form
+            action="{% url 'apply_job' job.pk %}"
+            method="post"
+            style="display: inline"
+          >
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-primary">Apply</button>
+          </form>
+          {% endif %}
         </div>
-    {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="alert alert-info">No jobs found matching your criteria.</div>
+  </div>
+  {% endfor %}
 </div>
 {% endblock %}

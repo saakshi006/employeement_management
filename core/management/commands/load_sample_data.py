@@ -4,6 +4,8 @@ from core.models import Skill
 from employees.models import EmployeeProfile
 from employers.models import EmployerProfile
 from jobs.models import Job
+from django.utils import timezone
+from datetime import timedelta
 import random
 
 User = get_user_model()
@@ -16,14 +18,18 @@ class Command(BaseCommand):
         Job.objects.all().delete()
         EmployeeProfile.objects.all().delete()
         EmployerProfile.objects.all().delete()
-        User.objects.exclude(is_superuser=True).delete()
+        # User.objects.exclude(is_superuser=True).delete()
+        for user in User.objects.all():
+            if not user.is_superuser:
+                user.delete()
         Skill.objects.all().delete()
 
         self.stdout.write('Creating skills...')
         skills_list = [
-            'Python', 'Django', 'JavaScript', 'HTML', 'CSS', 'React', 'SQL', 
-            'Communication', 'Teamwork', 'Leadership', 'Data Analysis', 'Sales',
-            'Driving', 'Cooking', 'Cleaning', 'Carpentry', 'Plumbing'
+            'Plumbing', 'Tailoring', 'Cooking', 'Cleaning', 'Driving', 
+            'Electrician', 'Carpentry', 'Masonry', 'Security Guard', 
+            'Housekeeping', 'Painting', 'Babysitting', 'Laundry', 'Gardening',
+            'Communication', 'Teamwork', 'Labor'
         ]
         skills_objs = []
         for name in skills_list:
@@ -32,20 +38,51 @@ class Command(BaseCommand):
 
         self.stdout.write('Creating users and profiles...')
         
-        # Admin
-        if not User.objects.filter(username='admin').exists():
+        # 1. Admin
+        # if not User.objects.filter(username='admin').exists():
+        if User.objects.filter(username='admin').count() == 0:
             User.objects.create_superuser('admin', 'admin@system.com', 'admin123', role='admin')
-        
-        # Employers (5)
+        else:
+            # Ensure admin has correct password if it exists (for demo purposes)
+            try:
+                u = User.objects.get(username='admin')
+                u.set_password('admin123')
+                u.save()
+            except:
+                pass
+
+        # 2. Demo Employer (Specific Account)
+        demo_employer = User.objects.create_user(username='employer', email='employer@demo.com', password='employer123', role='employer')
+        EmployerProfile.objects.create(
+            user=demo_employer,
+            company_name='Local Services Agency',
+            contact_email='employer@demo.com',
+            phone='9876543210',
+            location='Mumbai'
+        )
+
+        # 3. Demo Employee (Specific Account)
+        demo_employee = User.objects.create_user(username='employee', email='employee@employee.com', password='employee123', role='employee')
+        emp_profile = EmployeeProfile.objects.create(
+            user=demo_employee,
+            name='Raju Plumber',
+            age=28,
+            experience_years=5,
+            phone='9123456780',
+            location='Mumbai'
+        )
+        emp_profile.skills.add(Skill.objects.get(name='Plumbing'), Skill.objects.get(name='Electrician'))
+
+        # 4. Additional Employers
         employer_data = [
-            ('Tech Solutions', 'tech@demo.com', 'Mumbai'),
-            ('City Services', 'city@demo.com', 'Delhi'),
-            ('Food Express', 'food@demo.com', 'Bangalore'),
-            ('BuildIt Construction', 'build@demo.com', 'Pune'),
-            ('Home Helpers', 'home@demo.com', 'Chennai'),
+            ('City Construction Co', 'construction@demo.com', 'Mumbai'),
+            ('Home Helpers Agency', 'helpers@demo.com', 'Delhi'),
+            ('Tasty Tiffin Service', 'tiffin@demo.com', 'Bangalore'),
+            ('Secure Guards Ltd', 'security@demo.com', 'Pune'),
+            ('Daily Needs Manpower', 'daily@demo.com', 'Chennai'),
         ]
         
-        employers = []
+        employers = [demo_employer.employer_profile] # Start with demo employer
         for i, (company, email, loc) in enumerate(employer_data):
             username = f'employer{i+1}'
             user = User.objects.create_user(username=username, email=email, password='employer123', role='employer')
@@ -53,21 +90,21 @@ class Command(BaseCommand):
                 user=user,
                 company_name=company,
                 contact_email=email,
-                phone=f'987654321{i}',
+                phone=f'987654321{i+1}',
                 location=loc
             )
             employers.append(profile)
 
-        # Employees (8)
+        # 5. Additional Employees
         employee_data = [
-            ('Ravi Kumar', 25, 3, 'Mumbai', ['Python', 'Django', 'SQL']),
-            ('Anita Singh', 22, 1, 'Delhi', ['HTML', 'CSS', 'JavaScript']),
-            ('Suresh Patel', 30, 8, 'Pune', ['Driving', 'Communication']),
-            ('Meena Devi', 28, 5, 'Bangalore', ['Cooking', 'Cleaning']),
-            ('Rahul Sharma', 24, 2, 'Mumbai', ['Sales', 'Communication']),
-            ('Vikram Singh', 35, 10, 'Delhi', ['Carpentry', 'Plumbing']),
-            ('Priya Gupta', 26, 4, 'Chennai', ['Data Analysis', 'Python']),
-            ('Amit Verma', 29, 6, 'Pune', ['Leadership', 'Teamwork', 'Sales']),
+            ('Sunita Devi', 35, 10, 'Mumbai', ['Tailoring', 'Cooking']),
+            ('Ramesh Kumar', 22, 2, 'Delhi', ['Driving', 'Labor']),
+            ('Lakshmi Patel', 40, 15, 'Pune', ['Cooking', 'Cleaning', 'Housekeeping']),
+            ('Abdul Khan', 28, 5, 'Bangalore', ['Carpentry', 'Painting']),
+            ('Vijay Singh', 24, 1, 'Mumbai', ['Security Guard', 'Labor']),
+            ('Deepak Verma', 30, 8, 'Delhi', ['Electrician', 'Plumbing']),
+            ('Anita Gupta', 26, 4, 'Chennai', ['Babysitting', 'Laundry']),
+            ('Sanjay Yadav', 29, 6, 'Pune', ['Gardening', 'Labor']),
         ]
 
         for i, (name, age, exp, loc, skill_names) in enumerate(employee_data):
@@ -78,7 +115,7 @@ class Command(BaseCommand):
                 name=name,
                 age=age,
                 experience_years=exp,
-                phone=f'912345678{i}',
+                phone=f'912345678{i+1}',
                 location=loc
             )
             for s_name in skill_names:
@@ -86,27 +123,72 @@ class Command(BaseCommand):
                 profile.skills.add(skill)
 
         self.stdout.write('Creating jobs...')
-        # Jobs (7)
+        # Jobs (Expanded list for better charts)
         job_data = [
-            (0, 'Python Developer', ['Python', 'Django'], 2, '50000', 'Mumbai'),
-            (0, 'Backend Engineer', ['Python', 'SQL'], 4, '80000', 'Mumbai'),
-            (1, 'Frontend Intern', ['HTML', 'CSS'], 0, '15000', 'Delhi'),
-            (2, 'Chef', ['Cooking'], 3, '30000', 'Bangalore'),
-            (3, 'Site Supervisor', ['Leadership', 'Teamwork'], 5, '45000', 'Pune'),
-            (3, 'Laborer', ['Teamwork'], 0, '12000', 'Pune'),
-            (4, 'Housekeeper', ['Cleaning', 'Cooking'], 1, '18000', 'Chennai'),
+            (0, 'Experienced Plumber Needed', ['Plumbing'], 5, '15000', 'Mumbai'),
+            (1, 'Construction Laborer', ['Labor', 'Masonry'], 1, '12000', 'Mumbai'),
+            (2, 'House Maid Wanted', ['Cleaning', 'Cooking'], 2, '10000', 'Delhi'),
+            (3, 'Cook for Tiffin Service', ['Cooking'], 3, '14000', 'Bangalore'),
+            (4, 'Night Security Guard', ['Security Guard'], 1, '13000', 'Pune'),
+            (4, 'Security Supervisor', ['Security Guard', 'Teamwork'], 8, '20000', 'Pune'),
+            (5, 'Driver for Family', ['Driving'], 4, '16000', 'Chennai'),
+            (0, 'Electrician for Shop', ['Electrician'], 3, '18000', 'Mumbai'),
+            (1, 'Site Manager', ['Teamwork', 'Communication'], 5, '25000', 'Mumbai'),
+            (2, 'Nanny', ['Babysitting'], 2, '11000', 'Delhi'),
+            (3, 'Kitchen Helper', ['Cleaning'], 0, '9000', 'Bangalore'),
+            (5, 'Valet Driver', ['Driving'], 2, '15000', 'Chennai'),
+            (0, 'Home Painter', ['Painting'], 3, '14000', 'Mumbai'),
+            (4, 'Bodyguard', ['Security Guard'], 5, '22000', 'Pune'),
+            (2, 'Gardener', ['Gardening'], 1, '8000', 'Delhi'),
         ]
 
-        for emp_idx, title, req_skills, exp, sal, loc in job_data:
-            job = Job.objects.create(
-                employer=employers[emp_idx],
-                title=title,
-                experience_required=exp,
-                salary=sal,
-                location=loc
-            )
-            for s_name in req_skills:
-                skill = Skill.objects.get(name=s_name)
-                job.required_skills.add(skill)
+        all_employees = list(EmployeeProfile.objects.all())
+
+        for i, (emp_idx, title, req_skills, exp, sal, loc) in enumerate(job_data):
+            # emp_idx maps to employers list which includes demo employer at index 0
+            if emp_idx < len(employers):
+                job = Job.objects.create(
+                    employer=employers[emp_idx],
+                    title=title,
+                    experience_required=exp,
+                    salary=sal,
+                    location=loc
+                )
+                for s_name in req_skills:
+                    skill = Skill.objects.get(name=s_name)
+                    job.required_skills.add(skill)
+                
+                # Intentionally create distributed matches (High, Medium, Low)
+                # We'll fill about 70% of the jobs
+                if i % 10 < 7 and all_employees: 
+                    # Deterministic assignment to ensure distribution
+                    # Modulo 3: 0 -> High match, 1 -> Medium match, 2 -> Low match
+                    
+                    match_type = i % 3
+                    selected_emp = None
+                    
+                    job_skills = set(job.required_skills.all())
+                    
+                    if match_type == 0: # Try to find High Match (All skills + good exp)
+                        candidates = [e for e in all_employees if set(e.skills.all()).issuperset(job_skills) and e.experience_years >= exp]
+                        if candidates: selected_emp = random.choice(candidates)
+                    
+                    elif match_type == 1: # Try to find Medium Match (Some skills or exp mismatch)
+                        candidates = [e for e in all_employees if set(e.skills.all()).intersection(job_skills) and not set(e.skills.all()).issuperset(job_skills)]
+                        if candidates: selected_emp = random.choice(candidates)
+                        
+                    elif match_type == 2: # Try to find Low Match (No skills overlap)
+                        candidates = [e for e in all_employees if not set(e.skills.all()).intersection(job_skills)]
+                        if candidates: selected_emp = random.choice(candidates)
+                    
+                    # Fallback if specific match type not found
+                    if not selected_emp:
+                        selected_emp = random.choice(all_employees)
+
+                    job.filled_by = selected_emp
+                    # Spread dates over last 6 months for better line chart
+                    days_ago = random.randint(0, 180)
+                    job.filled_at = timezone.now() - timedelta(days=days_ago)
+                    job.save()
 
         self.stdout.write(self.style.SUCCESS('Successfully loaded sample data'))
